@@ -24,6 +24,12 @@ PRIVATE void tty_do_read(TTY* p_tty);
 PRIVATE void tty_do_write(TTY* p_tty);
 PRIVATE void put_key(TTY* p_tty, u32 key);
 
+
+int escCount; //记录按下几次esc键
+int actionBlock=0; //查找时是否可以按下普通键
+unsigned int searchBeginPosition=0;
+
+
 /*======================================================================*
                            task_tty
  *======================================================================*/
@@ -63,6 +69,20 @@ PUBLIC void in_process(TTY* p_tty, u32 key)
 {
         char output[2] = {'\0', '\0'};
 
+
+        //退出查找模式
+        if(actionBlock==1){
+        	int rawCode=key&MASK_RAW;
+        	switch(rawCode){
+        		case ESC:
+        			exitSearch(p_tty->p_console,searchBeginPosition);
+        			return;
+        		default:
+        			return;
+        	}
+        }
+
+
         if (!(key & FLAG_EXT)) {
 		put_key(p_tty, key);
         }
@@ -70,8 +90,16 @@ PUBLIC void in_process(TTY* p_tty, u32 key)
                 int raw_code = key & MASK_RAW;
                 switch(raw_code) {
                 case ENTER:
-			put_key(p_tty, '\n');
-			break;
+                	//判断之前是否按过esc键
+					if (escCount==0)
+					{
+						put_key(p_tty, '\n');
+						break;
+					}else{
+						actionBlock=1;
+						changeColor(p_tty->p_console,searchBeginPosition);
+						break;
+					}
                 case BACKSPACE:
 			put_key(p_tty, '\b');
 			break;
@@ -83,6 +111,16 @@ PUBLIC void in_process(TTY* p_tty, u32 key)
 		case DOWN:
 			if ((key & FLAG_SHIFT_L) || (key & FLAG_SHIFT_R)) {
 				scroll_screen(p_tty->p_console, SCR_UP);
+			}
+			break;
+		case TAB:
+			put_key(p_tty,'\t');
+			break;
+		case ESC:
+			if (escCount==0){
+				/* 进入查找模式  */
+				searchBeginPosition=p_tty->p_console->cursor;
+				escCount=1;
 			}
 			break;
 		case F1:

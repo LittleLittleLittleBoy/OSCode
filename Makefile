@@ -31,7 +31,7 @@ OBJS		= kernel/kernel.o kernel/syscall.o kernel/start.o kernel/main.o\
 DASMOUTPUT	= kernel.bin.asm
 
 # All Phony Targets
-.PHONY : everything final image clean realclean disasm all buildimg
+.PHONY : everything final image clean realclean disasm all buildimg run
 
 # Default starting position
 nop :
@@ -42,6 +42,11 @@ everything : $(ORANGESBOOT) $(ORANGESKERNEL)
 all : realclean everything
 
 image : realclean everything clean buildimg
+
+run : image start
+
+start: 
+	bochs -f bochsrc
 
 clean :
 	rm -f $(OBJS)

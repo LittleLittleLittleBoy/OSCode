@@ -88,7 +88,12 @@ void TestA()
 	int i = 0;
 	while (1) {
 		/* disp_str("A."); */
-		milli_delay(10);
+		for (i = 0; i < NR_CONSOLES; ++i)
+		{
+			/* code */
+			clear_screen(tty_table[i].p_console);
+		}
+		milli_delay(100000);
 	}
 }
 

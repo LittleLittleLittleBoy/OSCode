@@ -30,6 +30,10 @@ PRIVATE	int	num_lock;	/* Num Lock	 */
 PRIVATE	int	scroll_lock;	/* Scroll Lock	 */
 PRIVATE	int	column;
 
+PRIVATE int tab;   //设置tab键的标志位
+
+PRIVATE int esc;   //设置esc键的标志位
+
 PRIVATE int	caps_lock;	/* Caps Lock	 */
 PRIVATE int	num_lock;	/* Num Lock	 */
 PRIVATE int	scroll_lock;	/* Scroll Lock	 */
@@ -68,6 +72,9 @@ PUBLIC void init_keyboard()
 	shift_l	= shift_r = 0;
 	alt_l	= alt_r   = 0;
 	ctrl_l	= ctrl_r  = 0;
+
+	tab=0;
+	esc=0;
 
 	caps_lock   = 0;
 	num_lock    = 1;
@@ -185,6 +192,12 @@ PUBLIC void keyboard_read(TTY* p_tty)
 			case ALT_R:
 				alt_l = make;
 				break;
+			case TAB:
+				tab=make;
+				break;
+			case ESC:
+				esc=make;
+				break;
 			case CAPS_LOCK:
 				if (make) {
 					caps_lock   = !caps_lock;
@@ -286,6 +299,8 @@ PUBLIC void keyboard_read(TTY* p_tty)
 				key |= alt_l	? FLAG_ALT_L	: 0;
 				key |= alt_r	? FLAG_ALT_R	: 0;
 				key |= pad      ? FLAG_PAD      : 0;
+				key |=tab 		? TAB:0;
+				key |=esc 		?ESC:0;
 
 				in_process(p_tty, key);
 			}
